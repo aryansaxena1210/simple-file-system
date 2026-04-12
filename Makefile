@@ -1,15 +1,20 @@
-CC = gcc 
+CC = gcc
 LDLIBS = -lpthread
+OBJDIR = build
 
-objects = api.o application.o data_block.o dir.o inode.o open_file_table.o
-App = app
+objects = $(OBJDIR)/api.o $(OBJDIR)/application.o $(OBJDIR)/data_block.o $(OBJDIR)/dir.o $(OBJDIR)/inode.o $(OBJDIR)/open_file_table.o
+App = $(OBJDIR)/app
 
-all: $(App)
+all: $(OBJDIR) $(App)
+
+$(OBJDIR):
+	mkdir -p $(OBJDIR)
 
 $(App): $(objects)
 	$(CC) -o $(App) $(objects) $(LDLIBS)
 
-$(objects): %.o: %.c 
+$(OBJDIR)/%.o: %.c
+	$(CC) -c $< -o $@
 
 clean:
-	rm -f *.o app 
+	rm -rf $(OBJDIR)

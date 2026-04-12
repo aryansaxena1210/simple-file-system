@@ -22,7 +22,7 @@ int RSFS_init(){
 int RSFS_create(char file_name){
 
 //------ your implementation -------
-
+    return -1;
 }
 
 
@@ -32,7 +32,7 @@ int RSFS_create(char file_name){
 int RSFS_open(char file_name, int access_flag){
     
 //------ your implementation -------
-
+    return -1;
 }
 
 
@@ -42,6 +42,7 @@ int RSFS_open(char file_name, int access_flag){
 int RSFS_append(int fd, void *buf, int size){
     
 //------ your implementation -------
+    return -1;
 
 }
 
@@ -52,6 +53,7 @@ int RSFS_append(int fd, void *buf, int size){
 int RSFS_fseek(int fd, int offset){
 
 //------ your implementation -------
+    return -1;
 
 }
 
@@ -62,6 +64,7 @@ int RSFS_fseek(int fd, int offset){
 int RSFS_read(int fd, void *buf, int size){
 
 //------ your implementation -------
+    return -1;
 
 }
 
@@ -70,6 +73,7 @@ int RSFS_read(int fd, void *buf, int size){
 int RSFS_write(int fd, void *buf, int size){
 
 //------ your implementation -------
+    return -1;
 
 }
 
@@ -79,6 +83,7 @@ int RSFS_write(int fd, void *buf, int size){
 int RSFS_close(int fd){
     
 //------ your implementation -------
+    return -1;
 
 }
 
@@ -88,6 +93,7 @@ int RSFS_close(int fd){
 int RSFS_delete(char file_name){
 
 //------ your implementation -------
+    return -1;
 
 }
 
