@@ -19,15 +19,33 @@ int root_inode_number=-1;
 //to allocate an empty inode and return the inode-number; 
 //if no free inode is available, return -1
 int allocate_inode(){
+    int inode_number = -1;
 
-//------ your implementation -------
+    pthread_mutex_lock(&inode_bitmap_mutex);
 
+    for(int i=0; i<NUM_INODES; i++){
+        if(inode_bitmap[i] == 0){
+            inode_number = i;
+            inode_bitmap[i] = 1;
+            // initialize inode by setting all data_blocks to -1 
+            for(int j=0; j<NUM_POINTERS; j++){
+                inodes[i].block[j] = -1;
+            }
+            inodes[i].length = 0;
+            break;
+        }
+    }
+
+    pthread_mutex_unlock(&inode_bitmap_mutex);
+
+    return inode_number;
 }
 
 
 //to free an inode with provided inode_number
 void free_inode(int inode_number){
 
-//------ your implementation -------
-
+    pthread_mutex_lock(&inode_bitmap_mutex);
+    inode_bitmap[inode_number] = 0;
+    pthread_mutex_unlock(&inode_bitmap_mutex);
 }
