@@ -62,6 +62,7 @@ WHY CANT IT JUST DO THAT FOR ME. aka added a lot of boilerplate
 
 Time to implement the RSFS api, as the lower level is made this part would be very trivial so i wont be taking a lot of notes until something stands out.
 
+8:17am - free_inode(inode_number); //alomst forgot to free, NOTE: on every error, remember to remove memory leaks before returning with error code
 
 9:10am - everything seemed to work EXCEPT there was garbage values in some inode's data blocks. Why? malloc will assign memory but will ahve garbage value. Fix:
 ```memset(data_blocks[root_inode_number], 0, BLOCK_SIZE);```

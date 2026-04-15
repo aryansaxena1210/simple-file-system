@@ -9,7 +9,7 @@ pthread_mutex_t mutex_for_fs_stat;//mutex used by RSFS_stat()
 
 //initialize file system - should be called as the first thing before accessing this file system 
 int RSFS_init(){
-
+    //all mutexes
     pthread_mutex_init(&mutex_for_fs_stat, NULL);
     pthread_mutex_init(&inode_bitmap_mutex, NULL);
     pthread_mutex_init(&inodes_mutex, NULL);
@@ -49,7 +49,7 @@ int RSFS_init(){
         open_file_table[i].position = 0;
     }
 
-    // allocate inode for root directory
+    // allocate inode for root dirctory
     root_inode_number = allocate_inode(); //look inside bitmap, find first free location, initialize inode with that id, set bitmap of that lco to 1, return id.
     //to access the node again, do inodes[root_inode_number], and side note: bitmap[root_inode_number] if ofc ==1
     if(root_inode_number < 0){
@@ -66,7 +66,7 @@ int RSFS_init(){
 //if file_name already exists, return -1; 
 //otherwise (other errors), return -2.
 int RSFS_create(char file_name){
-    // check if file already exists
+    // check if fille already exists
     struct dir_entry *entry = search_dir(file_name);
     if(entry != NULL) return -1;
 
@@ -80,7 +80,7 @@ int RSFS_create(char file_name){
     // insert into directory
     entry = insert_dir(file_name, inode_number);
     if(entry == NULL){
-        free_inode(inode_number);
+        free_inode(inode_number); //alomst forgot to free, NOTE: on every error, remember to remove memory leaks before returning with error code
         return -2;
     }
 
@@ -226,7 +226,7 @@ int RSFS_write(int fd, void *buf, int size){
 
         if(block_index >= NUM_POINTERS) break;
 
-        // allocate block if needed
+        // allocate block ONLY IF IT IS NEEDED
         if(inode->block[block_index] == -1){
             int block_number = allocate_data_block();
             if(block_number < 0) break;
@@ -244,7 +244,7 @@ int RSFS_write(int fd, void *buf, int size){
         entry->position += bytes_to_write;
     }
 
-    // truncate file to current position if we wrote past the end
+    // truncate file to curent position if we wrote past the end
     if(entry->position > inode->length){
         inode->length = entry->position;
     } else {
