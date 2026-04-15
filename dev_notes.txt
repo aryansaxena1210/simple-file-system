@@ -1,0 +1,68 @@
+2:15pm- THOUGHT PROCESS:
+
+- dumbest possible thing:
+
+we have RSFS_init, RFSF_open, etc. these are clearly higher level api's, if i had an idea of what code goes in here i would have made a top down coding approach, cuz it has the advantage of making my code look good, not a lot of refactoring would be needed BUT
+i do not know what goes in there, so we have to do simplest thing first (which is ofc not the outtermost but rather the innermost layer of code). 
+
+what else do we have?
+Inode stuff - allocate and free
+File table stuff - open_file_entry and free_file_entry
+
+2:26pm- what i dont get yet:
+what is data_block. we know every inode has data, so it will probably be used inside inode.c but idk how exactly rn
+
+
+2:33pm- what does it mean to return inode-number. is there a global inodes array? I first thought we will allocate Inode to heapm and then return pointer, but then i saw the function return int not Inode*  
+```
+//to allocate an empty inode and return the inode-number; 
+//if no free inode is available, return -1
+int allocate_inode(){
+//------ your implementation -------
+    
+}```
+lol scrolled up 10 lines to see ```struct inode inodes[NUM_INODES];``` -- thats my global array
+
+2:38 - i just realized if i do if(inodes[i])==NULL, that means we need to make sure we DONT have garbage after initializing inodes[array]
+
+2:40 - , realized there is a bitmap_inode[], which tells which inodes are taken and which index of inodes[] is free.
+Question is, where do we initialize the bitmap_inode[]'s each element to be 0? in RSFS_init probably.
+
+
+3:05- so we have inodes[i].blocks, now i saw each block is a char and not a pointer. how will we add a block to the inode if it is not a pointer?
+why is it a char and not int? lets say cuz it id rediculously simple and we want to save that extra 1 byte of mem? who cares. What i care abt is, there has to be a global array that stores blocks, and this inodes[i].blocks[j] gives us the id of the jth block
+
+3:24- at first i thought i should free up the data blocks while i free up inode in free_inode(inode_num) function, but then that defeates the single responsibility principle.
+i should delete the data blocks BEFORE i call call to free_inode. but for that, we first NEED to know where and how are we calling the free_inode. ans- prolly inside RSFS_delete. hence, i will choose to handle the data block deletion in RSFS_delete
+
+3:39pm - naturally, next step is to implement open_file_table stuff. first thing i see is access_flag exist. To code allocate_open_file_entry, we need to find the possible values of access_flag. so 'grep flag' and i found in def.h two flags, RSFS_RDONLY=0, RSFS_RDWR =1;
+
+4:00pm - took a while, here is how the chronology happened. First, i tried to just do the dumbes possible thing"
+    ```
+    //lock thread -> find first free spot in open_file_table -> change/update the inner fields ```
+    then things will clarify themselves as you start coding so no stress, just keep doing something dumb and things will make sense
+
+4:17pm - question is, what next. clearly we have done the two lower level stuff that RSFS needs. now, only the RSFS_* type fucntions are remaining. Goes without saying, very first thing to do is RSFS_init. start by writing comments about the steps, then write code. 
+4:27pm - here is the comments from my code as i pondered the dumbest possible thing:
+    ```
+        //what should init do?
+    //free all blocks before deleting inode, but thats for RSDS_delete or something, currently not relavent but my rbain is screaming to not ethis down cuz i amy forget and lead to a memory leak
+    //back to init
+    // initialize all global vars/arrays to be {0}, whatever that means for that particular global var
+    //list of global stuff:
+    //  1. root_inode_num (already =-1 so not this),
+    //  2. inodes, inode_bitmap, data_bitmap, data_blocks, root_data_block, open_file_table,
+    ```
+    time to make things less dumb, more sophisticated
+
+4:31 - just realized i totally forgot to initialize mutexes. ALSO I HATE C MAN WHY DO I HAVE TO WRITE A FOR LOOP TO NULL-INITIALIZE ALL MY GLOBAL STUFF. 
+WHY CANT IT JUST DO THAT FOR ME. aka added a lot of boilerplate
+
+4/15/26: 7:53 am
+
+Time to implement the RSFS api, as the lower level is made this part would be very trivial so i wont be taking a lot of notes until something stands out.
+
+
+9:10am - everything seemed to work EXCEPT there was garbage values in some inode's data blocks. Why? malloc will assign memory but will ahve garbage value. Fix:
+```memset(data_blocks[root_inode_number], 0, BLOCK_SIZE);```
+
